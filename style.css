@@ -1,0 +1,27 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+    background-color: aliceblue;
+}
+
+#main-frame {
+    background-color: black;
+    border: purple 10px solid;
+    padding: 10px;
+    margin: 10px;
+
+    display: flex;
+    justify-content: center;
+}
+
+#canvas{
+    background-color: pink;
+    border: cyan 10px solid;
+    padding: 10px;
+    margin: 10px;
+}
+
