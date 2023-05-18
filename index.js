@@ -38,7 +38,7 @@ class Board {
   }
 }
 
-var board = new Board(size=10, unitSize=30, borderSize=2, "black");
+var board = new Board(size=20, unitSize=10, borderSize=2, "black");
 
 var canvasElement = document.createElement("canvas");
 canvasElement.width = board.width;
@@ -81,6 +81,41 @@ function handleSwitchCell(x, y) {
   drawBoard();
 }
 
+function countAliveNeighbours(x, y) {
+  let aliveNeighbours = 0;
+  for (let i=x-1; i<=x+1; i+=1) {
+    for (let j=y-1; j<=y+1; j+=1) {
+      if (i >= 0 && i < board.size && j >= 0 && j < board.size && !(i === x && j === y)) {
+        if (board.cells[i][j].state) {
+          aliveNeighbours += 1;
+        }
+      }
+    }
+  }
+  return aliveNeighbours;
+}
+
+function computeNextTurn() {
+  newBoard = new Board(board.size, board.unitSize, board.borderSize);
+  for (let i=0; i<board.size; i+=1) {
+    for (let j=0; j<board.size; j+=1) {
+      if (board.cells[i][j].state) {
+        if (countAliveNeighbours(i, j) < 2 || countAliveNeighbours(i, j) > 3) {
+          newBoard.cells[i][j].state = false;
+        }
+        if (countAliveNeighbours(i, j) === 2 || countAliveNeighbours(i, j) === 3) {
+          newBoard.cells[i][j].state = true;
+        }
+      } else {
+        if (countAliveNeighbours(i, j) === 3) {
+          newBoard.cells[i][j].state = true;
+        }
+      }
+    }
+  }
+  return newBoard;
+}
+
 // Click event
 function getCursorPosition(canvas, e) {
   mousePosLocal = {
@@ -100,15 +135,46 @@ canvasElement.addEventListener('mousedown', function(e) {
   getCursorPosition(canvasElement, e);
 });
 
+// Pause button
+var paused = true;
+var pauseButton = document.createElement("button");
+pauseButton.textContent = "Start";
+var intervalId = null;
+
+pauseButton.addEventListener('click', function() {
+  paused = !paused;
+  if (paused) {
+    pauseButton.textContent = "Resume";
+    clearInterval(intervalId);
+    intervalId = null;
+  } else {
+    pauseButton.textContent = "Pause";
+    if (intervalId === null) {
+      startCounter();
+    }
+  }
+}, false);
+
 // Turn counter
 var turnCounterP = document.createElement("p");
 var turnCounter = 0;
 turnCounterP.textContent = `Counter: ${turnCounter}`;
+
 function incrementTurnCount() {
   turnCounter += 1;
   turnCounterP.textContent = `Counter: ${turnCounter}`;
+
+  board = computeNextTurn();
+  drawBoard();
 }
-setInterval(incrementTurnCount, 1000)
+
+function startCounter() {
+  if (intervalId === null && !paused) {
+    intervalId = setInterval(incrementTurnCount, 100);
+  }
+}
+
+startCounter();
 
 // Mouse position
 var mousePositionP = document.createElement("p")
@@ -119,13 +185,13 @@ canvasElement.addEventListener('mousemove', (e) => {
   mousePositionP.textContent = `[global]: ${mousePosGlobal.x}, ${mousePosGlobal.y} | [local]: ${mousePosLocal.x}, ${mousePosLocal.y}`;
 });
 
-
 // Debug
 var debugDiv = document.createElement("div");
-debugDiv.appendChild(mousePositionP);
 debugDiv.appendChild(turnCounterP);
+debugDiv.appendChild(mousePositionP);
 
 // Build DOM
 divElement.appendChild(canvasElement);
 document.body.appendChild(divElement);
+document.body.appendChild(pauseButton);
 document.body.appendChild(debugDiv);
