@@ -100,15 +100,32 @@ canvasElement.addEventListener('mousedown', function(e) {
   getCursorPosition(canvasElement, e);
 });
 
+// Turn counter
+var turnCounterP = document.createElement("p");
+var turnCounter = 0;
+turnCounterP.textContent = `Counter: ${turnCounter}`;
+function incrementTurnCount() {
+  turnCounter += 1;
+  turnCounterP.textContent = `Counter: ${turnCounter}`;
+}
+setInterval(incrementTurnCount, 1000)
+
 // Mouse position
-var myP = document.createElement("div")
+var mousePositionP = document.createElement("p")
+mousePositionP.textContent = `[global]: NaN, NaN | [local]: NaN, NaN`;
 canvasElement.addEventListener('mousemove', (e) => {
   mousePosGlobal = { x: e.clientX, y: e.clientY };
   mousePosLocal = { x: e.clientX - e.target.offsetLeft, y: e.clientY - e.target.offsetTop };
-  myP.textContent = `[global]: ${mousePosGlobal.x}, ${mousePosGlobal.y} | [local]: ${mousePosLocal.x}, ${mousePosLocal.y}`;
-})
+  mousePositionP.textContent = `[global]: ${mousePosGlobal.x}, ${mousePosGlobal.y} | [local]: ${mousePosLocal.x}, ${mousePosLocal.y}`;
+});
+
+
+// Debug
+var debugDiv = document.createElement("div");
+debugDiv.appendChild(mousePositionP);
+debugDiv.appendChild(turnCounterP);
 
 // Build DOM
 divElement.appendChild(canvasElement);
 document.body.appendChild(divElement);
-document.body.appendChild(myP);
+document.body.appendChild(debugDiv);
